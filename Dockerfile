@@ -1,20 +1,27 @@
-# Use official Eclipse Temurin OpenJDK 17 image (stable LTS)
-FROM eclipse-temurin:21-jdk
+# ===============================
+# 1. BUILD STAGE
+# ===============================
+FROM maven:3.9.9-eclipse-temurin-21 AS build
+WORKDIR /app
+COPY pom.xml .
+RUN mvn -q -e -DskipTests dependency:go-offline
+COPY src ./src
+RUN mvn -q -e -DskipTests clean package
 
-# Set working directory inside container
+# ===============================
+# 2. RUN STAGE
+# ===============================
+FROM eclipse-temurin:21-jdk
 WORKDIR /app
 
-# Copy all files from backend folder into container
-COPY . .
+# copy the fat jar
+COPY --from=build /app/target/backend-0.0.1-SNAPSHOT.jar app.jar
 
-# Give execute permission to Maven wrapper
-RUN chmod +x mvnw
+# Environment for production profile
+ENV SPRING_PROFILES_ACTIVE=prod
 
-# Build the project (skip tests)
-RUN ./mvnw clean package -DskipTests
-
-# Expose port 8080 (Spring Boot default)
+# Expose Render's dynamic PORT variable
+ENV PORT=8080
 EXPOSE 8080
 
-# Run the jar (wildcard picks the built jar automatically)
-CMD ["java", "-jar", "target/backend-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
