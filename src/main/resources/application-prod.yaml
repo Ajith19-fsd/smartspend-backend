@@ -1,0 +1,45 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: backend
+
+  datasource:
+    url: jdbc:postgresql://ep-fragrant-cloud-a1wsdcgp-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channelBinding=require
+    username: neondb_owner
+    password: npg_VxClcq4eHT1F
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  mail:
+    host: smtp.sendgrid.net
+    port: 587
+    username: apikey
+    password: ${SENDGRID_API_KEY}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+jwt:
+  secret: m9PqF7X2sQ5vE8yH0tR4bN3wK6cJ1lU7pM2aS9dQ4gY8hR3lT6vC5xZ1eB7nD0pQ3rS5uW9yL2oP6dT8cV4fJ0kM3qL7wB2Z
+  expiration: 86400000
+
+cors:
+  allowed-origins: "*"                 # Allow frontend hosted separately
+
+smartspend:
+  otp:
+    auto-verify: false                 # NEVER auto verify in Prod
+    ttl-minutes: 10

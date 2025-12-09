@@ -1,0 +1,4 @@
+smartspend:
+  otp:
+    auto-verify: true
+    ttl-minutes: 10

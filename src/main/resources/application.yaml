@@ -1,0 +1,48 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: backend
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/smart_spend?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=Asia/Kolkata
+    username: root
+    password: Ajith@19041998
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
+  mail:
+    host: smtp.sendgrid.net
+    port: 587
+    username: apikey
+    password: ${SENDGRID_API_KEY}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  profiles:
+    active: dev                         # <--- Default runs in DEV
+
+jwt:
+  secret: m9PqF7X2sQ5vE8yH0tR4bN3wK6cJ1lU7pM2aS9dQ4gY8hR3lT6vC5xZ1eB7nD0pQ3rS5uW9yL2oP6dT8cV4fJ0kM3qL7wB2Z
+  expiration: 86400000
+
+cors:
+  allowed-origins: "http://localhost:3000"
+
+smartspend:
+  otp:
+    auto-verify: true                   # Local Only: Skip OTP
+    ttl-minutes: 10
