@@ -15,7 +15,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.addEndpoint("/ws")
                 .setAllowedOrigins(
                         "http://localhost:5173",
-                        "https://smartspend.vercel.app"
+                        "http://localhost:3000",
+                        "https://ss-frontend.netlify.app"      // <-- 🌟 ADD THIS
                 )
                 .withSockJS();
     }

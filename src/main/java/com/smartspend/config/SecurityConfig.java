@@ -16,7 +16,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
-import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 public class SecurityConfig {
@@ -49,25 +49,23 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
                     config.setAllowCredentials(true);
-                    config.setAllowedOriginPatterns(Arrays.asList(
+                    config.setAllowedOrigins(List.of(
                             "http://localhost:3000",
-                            "https://smartspend.vercel.app"
+                            "http://localhost:5173",
+                            "https://ss-frontend.netlify.app"     // <-- 🌟 ADD THIS
                     ));
-                    config.addAllowedHeader("*");
-                    config.addAllowedMethod("*");
+                    config.setAllowedHeaders(List.of("*"));
+                    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
                     return config;
                 }))
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/email/**").permitAll()
-                        // Protected endpoints
                         .anyRequest().authenticated()
                 );
 
-        // Register JWT filter
         http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
