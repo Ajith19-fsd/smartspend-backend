@@ -7,8 +7,8 @@ spring:
 
   datasource:
     url: jdbc:postgresql://ep-fragrant-cloud-a1wsdcgp-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channelBinding=require
-    username: neondb_owner
-    password: npg_VxClcq4eHT1F
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -33,7 +33,7 @@ spring:
             enable: true
 
 jwt:
-  secret: m9PqF7X2sQ5vE8yH0tR4bN3wK6cJ1lU7pM2aS9dQ4gY8hR3lT6vC5xZ1eB7nD0pQ3rS5uW9yL2oP6dT8cV4fJ0kM3qL7wB2Z
+  secret: ${JWT_SECRET}
   expiration: 86400000
 
 cors:
