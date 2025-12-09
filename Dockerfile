@@ -1,5 +1,5 @@
 # Use official Eclipse Temurin OpenJDK 17 image (stable LTS)
-FROM eclipse-temurin:17-jdk
+FROM eclipse-temurin:21-jdk
 
 # Set working directory inside container
 WORKDIR /app
