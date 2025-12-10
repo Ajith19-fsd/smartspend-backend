@@ -1,37 +1,48 @@
 package com.smartspend.email;
 
-import com.smartspend.auth.repository.UserRepository;
 import com.smartspend.auth.model.User;
+import com.smartspend.auth.repository.UserRepository;
+import com.sendgrid.*;
+import com.sendgrid.helpers.mail.Mail;
+import com.sendgrid.helpers.mail.objects.Content;
+import com.sendgrid.helpers.mail.objects.Email;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
 
 @Service
 public class EmailService {
 
     @Autowired
-    private JavaMailSender mailSender;
-
-    @Autowired
     private Environment env;
 
     @Autowired
-    private UserRepository userRepository; // For userId -> email lookup
+    private UserRepository userRepository;
 
-    // Get sender email from environment variable
-    private String getFromEmail() {
-        String from = env.getProperty("SENDER_EMAIL");
-        return (from != null && !from.isEmpty()) ? from : "no-reply@smartspend.local";
-    }
-
+    // Check if current profile is dev
     private boolean isDev() {
         String active = env.getProperty("spring.profiles.active", "dev");
         return "dev".equalsIgnoreCase(active);
     }
 
-    // Generic send email to specific email address
+    // Get sender email from env
+    private String getFromEmail() {
+        String from = env.getProperty("SENDER_EMAIL");
+        return (from != null && !from.isEmpty()) ? from : "no-reply@smartspend.local";
+    }
+
+    // Get SendGrid API key
+    private String getSendGridApiKey() {
+        String apiKey = env.getProperty("SENDGRID_API_KEY");
+        if (apiKey == null || apiKey.isEmpty()) {
+            throw new RuntimeException("SENDGRID_API_KEY is not set in environment variables");
+        }
+        return apiKey;
+    }
+
+    // Generic method to send email
     public void sendEmail(String toEmail, String subject, String text) {
         if (toEmail == null || toEmail.isEmpty()) return;
 
@@ -40,15 +51,27 @@ public class EmailService {
             return;
         }
 
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(getFromEmail());
-        message.setTo(toEmail);
-        message.setSubject(subject);
-        message.setText(text);
-        mailSender.send(message);
+        Email from = new Email(getFromEmail());
+        Email to = new Email(toEmail);
+        Content content = new Content("text/plain", text);
+        Mail mail = new Mail(from, subject, to, content);
+
+        SendGrid sg = new SendGrid(getSendGridApiKey());
+        Request request = new Request();
+
+        try {
+            request.setMethod(Method.POST);
+            request.setEndpoint("mail/send");
+            request.setBody(mail.build());
+            Response response = sg.api(request);
+
+            System.out.println("[SENDGRID] Status Code: " + response.getStatusCode());
+        } catch (IOException ex) {
+            System.err.println("[SENDGRID] Error sending email: " + ex.getMessage());
+        }
     }
 
-    // Send email using userId (fetch email from DB)
+    // Send email using userId
     public void sendEmail(Long userId, String subject, String text) {
         if (userId == null) return;
 
@@ -60,31 +83,15 @@ public class EmailService {
 
     // Send OTP after signup
     public void sendOtpEmail(String toEmail, String otp) {
-        if (isDev()) {
-            System.out.println("[DEV - OTP] To: " + toEmail + " OTP: " + otp);
-            return;
-        }
-
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(getFromEmail());
-        message.setTo(toEmail);
-        message.setSubject("SmartSpend Registration OTP");
-        message.setText("Your OTP for SmartSpend registration is: " + otp + "\n\nThis OTP expires in 10 minutes.");
-        mailSender.send(message);
+        String subject = "SmartSpend Registration OTP";
+        String body = "Your OTP for SmartSpend registration is: " + otp + "\n\nThis OTP expires in 10 minutes.";
+        sendEmail(toEmail, subject, body);
     }
 
     // Send OTP for password reset
     public void sendResetOtpEmail(String toEmail, String otp) {
-        if (isDev()) {
-            System.out.println("[DEV - Reset OTP] To: " + toEmail + " OTP: " + otp);
-            return;
-        }
-
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(getFromEmail());
-        message.setTo(toEmail);
-        message.setSubject("SmartSpend Password Reset OTP");
-        message.setText("Your OTP to reset password is: " + otp + "\n\nThis OTP expires in 10 minutes.");
-        mailSender.send(message);
+        String subject = "SmartSpend Password Reset OTP";
+        String body = "Your OTP to reset password is: " + otp + "\n\nThis OTP expires in 10 minutes.";
+        sendEmail(toEmail, subject, body);
     }
 }
