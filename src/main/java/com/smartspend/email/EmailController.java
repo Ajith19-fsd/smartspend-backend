@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/email")
-@CrossOrigin(origins = "http://localhost:3000") // allow frontend requests
+@CrossOrigin(origins = "*")
 public class EmailController {
 
     @Autowired
