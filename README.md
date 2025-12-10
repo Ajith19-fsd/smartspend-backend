@@ -46,3 +46,8 @@ SmartSpend is a secure Expense Tracker backend built with **Spring Boot + Postgr
 ### ▶ Start Server
 ```bash
 mvn spring-boot:run
+
+📌 Note on Backend URL Usage
+
+🔸 The backend deployed URL (Render) is only for API validation and integration, not for direct use in a browser.
+🔸 All features must be accessed via the frontend (Netlify), which communicates with the backend securely through REST APIs.
