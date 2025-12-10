@@ -27,9 +27,15 @@ public class EmailService {
         return "dev".equalsIgnoreCase(active);
     }
 
-    // Get sender email from env
+    // Get sender email (Safe fallback logic)
     private String getFromEmail() {
-        String from = env.getProperty("SENDER_EMAIL");
+        // First try official location
+        String from = env.getProperty("smartspend.email.sender");
+        // Then fallback to raw SENDER_EMAIL var
+        if (from == null || from.isEmpty()) {
+            from = env.getProperty("SENDER_EMAIL");
+        }
+        // Final fallback
         return (from != null && !from.isEmpty()) ? from : "no-reply@smartspend.local";
     }
 
@@ -66,6 +72,7 @@ public class EmailService {
             Response response = sg.api(request);
 
             System.out.println("[SENDGRID] Status Code: " + response.getStatusCode());
+            System.out.println("[SENDGRID] Body: " + response.getBody());
         } catch (IOException ex) {
             System.err.println("[SENDGRID] Error sending email: " + ex.getMessage());
         }
